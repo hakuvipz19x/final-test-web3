@@ -1,0 +1,7 @@
+.approve-modal {
+    display: none;
+}
+
+#checkbox-approve:checked ~ .approve-modal {
+    display: block;
+}
