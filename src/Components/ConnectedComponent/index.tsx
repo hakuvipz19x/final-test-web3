@@ -1,34 +1,34 @@
-import { FC, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { IUser, IContract } from '../../Interfaces'
 import { Box, Button, TextField } from '@mui/material';
-
+import { ethers } from 'ethers'
 import Modal from './Modal'
 import './ConnectedComponent.scss'
 interface Props {
-    user: IUser | undefined,
+    user: IUser,
     allContract: IContract | undefined
-    approve: (wethContract: any, contract: any, input: string) => void,
-    deposit: (contract: any, input: string) => void,
-    withdraw: (contract: any, input: string) => void
-    harvest: (contract: any) => void
+    approve: (wethContract: any, mcContract: any, user: IUser) => void,
+    deposit: (mcContract: any, input: string) => void,
+    withdraw: (mcContract: any, input: string) => void
+    harvest: (mcContract: any) => void
 }
 
-const ConnectedComponent: FC<Props> = ({ user, allContract, approve, deposit, withdraw, harvest }: Props) => {
-    const [approveInput, setApproveInput] = useState('')
+const ConnectedComponent: FC<Props> = ({ user, allContract, approve, deposit, withdraw, harvest}: Props) => {
+    // console.log(user)
     const [depositInput, setDepositInput] = useState('')
     const [withdrawInput, setWithdrawInput] = useState('')
-    const [approveState, setApproveState] = useState(false)
     const [depositState, setDepositState] = useState(false)
     const [withdrawState, setWithdrawState] = useState(false)
     const [hasApproved, setHasApproved] = useState(false)
     // console.log(user)
+    // console.log(hasApproved)
 
+    useEffect(() => {
+        if (user.hasApproved) setHasApproved(true)
+    }, [user])
+    
     const handleState = (event: any, type: string): void => {
         switch (type) {
-            case 'approve': {
-                setApproveState(prevState => !prevState)
-                break;
-            }
             case 'deposit': {
                 setDepositState(prevState => !prevState)
                 break;
@@ -44,22 +44,20 @@ const ConnectedComponent: FC<Props> = ({ user, allContract, approve, deposit, wi
         try {
             switch (type) {
                 case 'approve': {
-                    const result = typeof await approve(allContract?.wethContract, allContract?.contract, approveInput)
-                    if (result === 'boolean') {
-                        setHasApproved(true)
-                    }
+                    await approve(allContract?.wethContract, allContract?.mcContract, user)
+                    // console.log(await getAllowance(allContract?.wethContract, allContract?.mcContract, user))
                     break;
                 }
                 case 'deposit': {
-                    deposit(allContract?.contract, depositInput)
+                    deposit(allContract?.mcContract, depositInput)
                     break;
                 }
                 case 'withdraw': {
-                    withdraw(allContract?.contract, withdrawInput)
+                    withdraw(allContract?.mcContract, withdrawInput)
                     break;
                 }
                 case 'harvest': {
-                    harvest(allContract?.contract)
+                    harvest(allContract?.mcContract)
                     break;
                 }
                 default: throw new Error('Unknown type')
@@ -72,10 +70,6 @@ const ConnectedComponent: FC<Props> = ({ user, allContract, approve, deposit, wi
 
     const onChange = (event: any, type: string) => {
         switch (type) {
-            case 'approve': {
-                setApproveInput(event.target.value)
-                break;
-            }
             case 'deposit': {
                 setDepositInput(event.target.value)
                 break;
@@ -86,14 +80,6 @@ const ConnectedComponent: FC<Props> = ({ user, allContract, approve, deposit, wi
             }
             default: throw new Error('Unknown type')
         }
-    }
-
-    const ApproveProps = {
-        user,
-        handleState,
-        handleSubmit,
-        onChange,
-        type: 'approve'
     }
 
     const DepositProps = {
@@ -174,7 +160,7 @@ const ConnectedComponent: FC<Props> = ({ user, allContract, approve, deposit, wi
                     <Box width='50%'
                         margin='30px auto'
                     >
-                        <Button variant="contained" style={{ width: "100%" }} onClick={(e) => handleState(e, 'approve')}>
+                        <Button variant="contained" style={{ width: "100%" }} onClick={(e) => handleSubmit(e, 'approve')}>
                             Approve
                         </Button>
                     </Box>
@@ -189,9 +175,9 @@ const ConnectedComponent: FC<Props> = ({ user, allContract, approve, deposit, wi
                 marginTop={5}
                 marginBottom={3}
             >
-                All stake: {user && user.allStake} WETH
+                All stake: {user && user.totalStake} WETH
             </Box>
-            {approveState && <Modal {...ApproveProps} />}
+            {/* {approveState && <Modal {...ApproveProps} />} */}
             {depositState && <Modal {...DepositProps} />}
             {withdrawState && <Modal {...WithdrawProps} />}
         </Box>

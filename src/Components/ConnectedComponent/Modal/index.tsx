@@ -3,7 +3,7 @@ import { Box, Button, TextField } from '@mui/material';
 import { IUser } from '../../../Interfaces'
 
 interface Props {
-    user: IUser | undefined,
+    user: IUser,
     handleState: (event: any, type: string) => void,
     onChange: (event: any, type: string) => void,
     handleSubmit: (event: any, type: string) => void,
@@ -35,7 +35,8 @@ const Modal: React.FC<Props> = ({user, handleState, onChange, handleSubmit, type
             <Box mt="50px">
                 <TextField label="Approve" size="small" onChange={(e) => onChange(e, type)}></TextField>
             </Box>
-            <Box mt="20px">Your WETH balance: {user && user.balance} WETH</Box>
+            {type === 'deposit' && <Box mt="20px">Your WETH balance: {user && user.balance} WETH</Box>}
+            {type === 'withdraw' && <Box mt="20px">Your WETH balance: {user && user.stake} WETH</Box>}
             <Box
                 marginTop={'20px'}
             >

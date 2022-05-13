@@ -3,11 +3,12 @@ export interface IUser {
     balance: string,
     stake: string,
     earned: string,
-    allStake: string
+    totalStake: string,
+    hasApproved: boolean
 }
 
 export interface IContract {
-    contract: any,
+    mcContract: any,
     wethContract: any, 
     dd2Contract: any
 }
